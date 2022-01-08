@@ -1,0 +1,7 @@
+# enable apache rewrite url engine
+RewriteEngine on
+
+# list of rewrite rule for remove the file script extension (.php) from url api call
+## to internally redirect /dir/file to /dir/file.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([^\.]+)$ $1.php [NC,L]

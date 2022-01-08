@@ -17,7 +17,7 @@
 
             try
             {
-                //try to connect
+                //try to connect to the database
                 $this->conn = new PDO('mysql:host=' . $this->host . ';dbname=' . $this->db_name . ';charset=utf8', $this->db_username, $this->db_psw);
             }
             catch(PDOException $e)
