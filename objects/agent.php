@@ -5,24 +5,23 @@
         // declare private variables with connection parameters
         private $conn;
         private $table_name = "wgs_agents";
+        
         //public agent proprieties
-
         public $id;
         public $agentName;
         public $username;
         public $saltPassword;
         public $passwordHash;
+        public $givenPassword;
         public $email;
 
         // constructor
-        public function __construct($db)
-        {
+        public function __construct($db){
             $this->conn = $db;
         }
 
         // function to check if username exists
-        function usernameExists()
-        {
+        function usernameExists(){
             // query to check the esistence
             $query = "SELECT *
                     FROM " . $this->table_name . "
@@ -51,11 +50,23 @@
                 $this->passwordHash = $row['password_hash'];
                 $this->email = $row['email'];
         
-                // return true because username exists in the database
+                // return true if username exists in the database
                 return true;
             }        
             // return false if username does not exist in the database
             return false;
+        }
+
+        function passwordCheck(){
+            // use password_verify() function to exceute the hash of $chain and compare it with $passwordHash
+            // note that password_hash() returns the algorithm, cost and salt as part of the returned hash. 
+            // therefore, all information that's needed to verify the hash is included in it.
+            if(password_verify($this->givenPassword, $this->passwordHash))
+                // if corrisponding
+                return true;
+            else
+                // if not
+                return false;
         }
     }
 ?>

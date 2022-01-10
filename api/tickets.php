@@ -1,51 +1,43 @@
 <?php
     //set the headers
-    header("Access-Control-Allow-Origin: https://wegivesupport.net/");  //
-    header('Content-Type: application/json; charset=UTF-8');            // content type and charset
+    header("Access-Control-Allow-Origin: https://wegivesupport.net/");  // Same-Origin Policy (anti XSS)
     header('Access-Control-Allow-Methods: GET, POST');                  // allow only GET and POST http methods
-
     
+    // include the needed config files
+    include_once '../help/opsupport.php';
 
-    //header('WWW-Authenticate: Basic realm="WeGiveSupport"');    // send header to require user authentication
+    // include JWT necessary files
+    include_once '../libs/php-jwt/src/BeforeValidException.php';
+    include_once '../libs/php-jwt/src/ExpiredException.php';
+    include_once '../libs/php-jwt/src/SignatureInvalidException.php';
+    include_once '../libs/php-jwt/src/JWT.php';
+    include_once '../libs/php-jwt/src/JWK.php';
+    include_once '../libs/php-jwt/src/Key.php';
+    use Firebase\JWT\JWT;
+    use Firebase\JWT\Key;
 
-
-
-    /*if (!isset($_SERVER['PHP_AUTH_USER'])) {
-        header('WWW-Authenticate: Basic realm="WeGiveSupport');
-        header('HTTP/1.0 401 Unauthorized');
-    } else 
-    {
-        echo "<p>Hello {$_SERVER['PHP_AUTH_USER']}.</p>";
-        echo "<p>You entered {$_SERVER['PHP_AUTH_PW']} as your password.</p>";
+    // check if JWT token isn't present or is empty
+    if((!isset($_COOKIE['sessionToken'])) || ($_COOKIE['sessionToken'] == "")){
+        // set response code 401 Unauthorized
+        http_response_code(401);
+        return;
     }
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    print_r($_SERVER);
-    //print_r($HTTP_SERVER_VARS);*/
-
-    /*if($_SERVER['HTTP_AUTHORIZATION'])
-    {
-        echo "Authenticate header has received from client";
-        header('HTTP 1.1 200 Ok');
-    }
-    else
-        header('HTTP 1.1 401 Unauthorized');*/
-
-    echo "\nDocumento segreto sotto login";    
+    else {    
+        try {
+            // JWT decode
+            $decoded = JWT::decode($_COOKIE['sessionToken'], new Key(OpSupport::getClaimJWT()[3], 'HS256'));    
+            // set response code 200 OK
+            http_response_code(200);    
+        }
+        catch (Exception $e){
+            // if decode fails, it means jwt is invalid, so set the response code 401 Unauthorized and some details why decode fails
+            http_response_code(401);
+            header('Content-Type: application/json; charset=UTF-8');
+            // tell the user access denied  & show error message
+            echo json_encode(array(
+                "message" => "Access denied.",
+                "error" => $e->getMessage()
+            ));
+        }
+    }   
 ?>
