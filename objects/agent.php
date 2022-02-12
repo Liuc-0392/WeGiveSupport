@@ -1,4 +1,4 @@
-<?
+<?php
     class Agent{
         // class for managing agents data and login check
 

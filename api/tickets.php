@@ -1,5 +1,7 @@
 <?php
-    //set the headers
+    /** that's controller for tickets API calls **/
+
+    // set the headers
     header("Access-Control-Allow-Origin: https://wegivesupport.net/");  // Same-Origin Policy (anti XSS)
     header('Access-Control-Allow-Methods: GET, POST');                  // allow only GET and POST http methods
     
@@ -27,7 +29,30 @@
             // JWT decode
             $decoded = JWT::decode($_COOKIE['sessionToken'], new Key(OpSupport::getClaimJWT()[3], 'HS256'));    
             // set response code 200 OK
-            http_response_code(200);    
+            http_response_code(200);
+            // get database connection
+            $database = new Database();
+            $db = $database->getConnection();
+            // instantiate new ticket object
+            $ticket = new Ticket($db);
+            // get the request method
+            $requestMethod = $_SERVER["REQUEST_METHOD"];            
+            // retreive the query parameters from url passing value and sanitize them
+            $queryParams = array(
+                'id'        => isset($_GET['id'])       ? htmlspecialchars(strip_tags($_GET['id']))         : '',
+                'priority'  => isset($_GET['priority']) ? htmlspecialchars(strip_tags($_GET['priority']))   : '',
+                'status'    => isset($_GET['status'])   ? htmlspecialchars(strip_tags($_GET['status']))     : ''
+            );
+            // if is GET -> read tickets
+            if($requestMethod == 'GET'){
+                $ticket->readTickets($queryParams);
+            }elseif($requestMethod == 'PUT'){
+
+            }elseif($requestMethod == 'POST'){
+
+            }elseif($requestMethod == 'DELETE'){
+                
+            }
         }
         catch (Exception $e){
             // if decode fails, it means jwt is invalid, so set the response code 401 Unauthorized and some details why decode fails
