@@ -20,6 +20,64 @@
             $this->conn = $db;
         }
 
+        // function to read tickets (GET method only)
+        function readAgents($queryParams){
+            /*  
+                case 1: read all agents (if id is not set)
+                case 2: read specific agent by id
+            */
+            // base query
+            $query = "SELECT * FROM " . $this->table_name . " WHERE " . 1;
+
+            if(!empty($queryParams['id'])){
+                $query .= " AND id = :id";
+            }            
+            // prepare the query
+            $stmt = $this->conn->prepare($query);
+            
+            // re-read the query for identify if is present a id placeholder and binding correctly.
+            $placeholders = array();
+            preg_match_all("~\:.*?(?=\s|$)~", $query, $placeholders);
+            // if is present
+            if(!empty($placeholders[0][0])){
+                // extract value from queryParams array (before remove ':' for create correct key)
+                // alert! bindParam requires a reference. It binds the variable to the statement, not the value
+                $value = &$queryParams[ltrim($placeholders[0][0], ':')];
+                // bind param with value
+                $stmt->bindParam($placeholders[0][0], $value, PDO::PARAM_INT);
+            }          
+            // execute query
+            $stmt->execute();  
+            return $stmt;
+        }
+
+        // function to edit existing agent (by id and PUT method only)
+        function updateAgent(){
+            // query for update record
+            $query = "UPDATE " . $this->table_name . " SET
+                agent_name=:agent_name, username=:username, email=:email WHERE id=:id";
+            // prepare query
+            $stmt = $this->conn->prepare($query);          
+            
+            // sanitize data
+            $this->agentName=htmlspecialchars(strip_tags($this->agentName));
+            $this->username=htmlspecialchars(strip_tags($this->username));
+            $this->email=htmlspecialchars(strip_tags($this->email));
+            $this->id=htmlspecialchars(strip_tags($this->id));
+            
+            // bind placeholers with value
+            $stmt->bindParam(":agent_name", $this->agentName, PDO::PARAM_STR);
+            $stmt->bindParam(":username", $this->username, PDO::PARAM_STR);
+            $stmt->bindParam(":email", $this->email, PDO::PARAM_STR);
+            $stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
+            
+            // execute query
+            if($stmt->execute()){
+                return true;
+            }          
+            return false;
+        }
+
         // function to check if username exists
         function usernameExists(){
             // query to check the esistence

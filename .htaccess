@@ -6,6 +6,12 @@ RewriteEngine on
 
 # -------- list of rewrite conditions for friendly search by id -------
 RewriteRule ^api/tickets/(.*)?$ api/tickets.php?id=$1
+
+#RewriteRule ^api/agents/(.*)?/tickets?status=(.*)?&priority=(.*)?$ api/tickets.php?agent=$1&status=$2&priority=$3
+RewriteRule ^api/agents/(.*)?/tickets$ api/tickets.php?agent=$1
+
+RewriteRule ^api/agents/(.*)?$ api/agents.php?id=$1
+
 # list of rewrite rule for remove the file script extension (.php) from url api call
 # to internally redirect /dir/file to /dir/file.php
 RewriteCond %{REQUEST_FILENAME} !-f
