@@ -3,7 +3,7 @@
     // set the headers
     header("Access-Control-Allow-Origin: https://wegivesupport.net/");  // same-Origin Policy (anti XSS)
     header('Content-Type: application/json; charset=UTF-8');            // tell to the client the MIME and charset
-    header('Access-Control-Allow-Methods: GET, POST, PUT');                  // allow only GET and POST http methods
+    header('Access-Control-Allow-Methods: GET, POST, PUT');             // allow only GET and POST http methods
     // include the needed config files
     include_once '../config/database.php';
     include_once '../objects/ticket.php';
@@ -82,16 +82,59 @@
                         array("message" => "No tickets found.")
                     );
                 }
+            // if is PUT -> update ticket
             }elseif($requestMethod == 'PUT'){
+                // retreive posted data
+                $data = json_decode(file_get_contents("php://input"));
 
+                // check if the request is getting from tickets/<id> endpoint and not /tickets only
+                if(!empty($queryParams['id']) &&
+                        !empty($data->customer) &&
+                            !empty($data->agent) &&
+                                !empty($data->priority) &&
+                                    !empty($data->object)){
+                    // set ticket property values
+                    $ticket->id = $queryParams['id'];
+                    $ticket->openingDate = $data->opening_date;
+                    $ticket->closingDate = $data->closing_date;
+                    $ticket->customer = $data->customer;
+                    $ticket->agent = $data->agent;
+                    $ticket->priority = $data->priority;
+                    $ticket->status = $data->status;
+                    $ticket->object = $data->object;
+                    $ticket->message = $data->message;
+
+                    // update the ticket
+                    if($ticket->updateTicket()){                
+                        // set response code 200 OK
+                        http_response_code(200);                
+                        // tell the user
+                        echo json_encode(array("message" => "Ticket was updated."));
+                    }                
+                    // if unable to update the ticket, tell the user
+                    else{                
+                        // set response code 503 Service unavailable
+                        http_response_code(503);                
+                        // tell the user
+                        echo json_encode(array("message" => "Unable to update ticket."));
+                    }
+                }
+                else{
+                    // set response code 400 Bad request
+                    http_response_code(400);
+                    // tell the user
+                    echo json_encode(array("message" => "Unable to update ticket. Data is incomplete or endpoint isn't correct for requested operation."));
+                }
+            // if is POST -> create ticket
             }elseif($requestMethod == 'POST'){
                 // retreive posted data
                 $data = json_decode(file_get_contents("php://input"));
                 // make sure main data are not empty
-                if(!empty($data->customer) &&
-                        !empty($data->agent) &&
-                            !empty($data->priority) &&
-                                !empty($data->object)){
+                if($_SERVER['REQUEST_URI'] == "/api/tickets" &&
+                        !empty($data->customer) &&
+                            !empty($data->agent) &&
+                                !empty($data->priority) &&
+                                    !empty($data->object)){
                     // set ticket property values
                     $ticket->openingDate = date('Y-m-d H:i:s'); // now
                     $ticket->closingDate = NULL;                // NULL for now
@@ -101,6 +144,7 @@
                     $ticket->status = '1';                      // obviously open
                     $ticket->object = $data->object;
                     $ticket->message = $data->message;
+
                     // create the ticket
                     if($ticket->createTicket()){                
                         // set response code 201 Created
@@ -121,10 +165,40 @@
                     // set response code 400 Bad request
                     http_response_code(400);                
                     // tell the user
-                    echo json_encode(array("message" => "Unable to create ticket. Data is incomplete."));
+                    echo json_encode(array("message" => "Unable to create ticket. Data is incomplete or endpoint isn't correct for requested operation."));
                 }
+            // if is DELETE -> delete ticket
             }elseif($requestMethod == 'DELETE'){
 
+                if(!empty($queryParams['id'])){
+                    $ticket->id = $queryParams['id'];
+                    
+                    if($ticket->removeTicket()){
+                        // set response code 200 OK
+                        http_response_code(201);                
+                        // tell the user
+                        echo json_encode(array("message" => "Ticket was removed."));
+                    }
+                    else{
+                        // set response code 503 Service unavailable
+                        http_response_code(503);                
+                        // tell the user
+                        echo json_encode(array("message" => "Unable to remove ticket."));
+                    }
+                }
+                else{
+                    // set response code 400 Bad request
+                    http_response_code(400);                
+                    // tell the user
+                    echo json_encode(array("message" => "Unable to remove ticket. Data is incomplete or endpoint isn't correct for requested operation."));
+                }
+            }
+            // if is not one of previous declared accepted methods, tell the user
+            else{
+                // set response code 400 Bad request
+                http_response_code(400);                
+                // tell the user
+                echo json_encode(array("message" => "Method not supported by API."));
             }
         }
         catch (Exception $e){
