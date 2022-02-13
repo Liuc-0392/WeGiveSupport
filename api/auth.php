@@ -1,14 +1,11 @@
 <?php
-    // set the required headers
+    // set the headers
     header("Access-Control-Allow-Origin: https://wegivesupport.net/"); // Same-Origin Policy (anti XSS)
-    header('Access-Control-Allow-Methods: POST');                      // allow only POST http method   
-    
-
+    header('Access-Control-Allow-Methods: POST');                      // allow only POST http method
     // include the needed config files
     include_once '../config/database.php';
     include_once '../objects/agent.php';
     include_once '../help/opsupport.php';
-
     // include JWT necessary files
     include_once '../libs/php-jwt/src/BeforeValidException.php';
     include_once '../libs/php-jwt/src/ExpiredException.php';

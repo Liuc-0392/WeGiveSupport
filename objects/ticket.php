@@ -58,9 +58,39 @@
                 // bind param with value
                 $stmt->bindParam($placeholders[0][$i], $value, PDO::PARAM_INT);
             }
+            // execute query
+            $stmt->execute();  
+            return $stmt;
         }
-        // function to insert new ticket (POST method only)
 
+        // function to create new ticket (POST method only)
+        function createTicket(){  
+            // query to insert record
+            $query = "INSERT INTO " . $this->table_name . " SET
+                opening_date=:opening_date, closing_date=:closing_date, customer=:customer, agent=:agent, priority=:priority, status=:status, object=:object, message=:message";
+            // prepare query
+            $stmt = $this->conn->prepare($query);          
+            // sanitize data
+            $this->customer=htmlspecialchars(strip_tags($this->customer));
+            $this->agent=htmlspecialchars(strip_tags($this->agent));
+            $this->priority=htmlspecialchars(strip_tags($this->priority));
+            $this->object=htmlspecialchars(strip_tags($this->object));
+            $this->message=htmlspecialchars(strip_tags($this->message));
+            // bind placeholers with value
+            $stmt->bindParam(":opening_date", $this->openingDate, PDO::PARAM_STR);
+            $stmt->bindParam(":closing_date", $this->closingDate, PDO::PARAM_NULL);
+            $stmt->bindParam(":customer", $this->customer, PDO::PARAM_INT);
+            $stmt->bindParam(":agent", $this->agent, PDO::PARAM_INT);
+            $stmt->bindParam(":priority", $this->priority, PDO::PARAM_INT);
+            $stmt->bindParam(":status", $this->status, PDO::PARAM_INT);
+            $stmt->bindParam(":object", $this->object, PDO::PARAM_STR);
+            $stmt->bindParam(":message", $this->message, PDO::PARAM_STR);
+            // execute query
+            if($stmt->execute()){
+                return true;
+            }          
+            return false;
+        }    
         // function to edit existing ticket (by id)
 
         // function to delete existing ticket (by id)
