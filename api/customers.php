@@ -6,7 +6,7 @@
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');             // allow only GET and POST http methods
     // include the needed config files
     include_once '../config/database.php';
-    include_once '../objects/ticket.php';
+    include_once '../objects/customer.php';
     include_once '../help/opsupport.php';
     // include JWT necessary files
     include_once '../libs/php-jwt/src/BeforeValidException.php';
@@ -32,47 +32,43 @@
             $database = new Database();
             $db = $database->getConnection();
             // instantiate new ticket object
-            $ticket = new Ticket($db);                       
+            $customer = new Customer($db);                       
             // retreive the query parameters from url passing value and sanitize them
             $queryParams = array(
                 'id'        => isset($_GET['id'])       ? htmlspecialchars(strip_tags($_GET['id']))         : '',
                 'priority'  => isset($_GET['priority']) ? htmlspecialchars(strip_tags($_GET['priority']))   : '',
-                'status'    => isset($_GET['status'])   ? htmlspecialchars(strip_tags($_GET['status']))     : '',
-                'agent'    => isset($_GET['agent'])   ? htmlspecialchars(strip_tags($_GET['agent']))     : ''
+                'status'    => isset($_GET['status'])   ? htmlspecialchars(strip_tags($_GET['status']))     : ''
             );
             // get the request method
             $requestMethod = $_SERVER["REQUEST_METHOD"];
             // if is GET -> read tickets
             if($requestMethod == 'GET'){
                 // call readTickets
-                $stmt = $ticket->readTickets($queryParams);
+                $stmt = $ticket->readCustomers($queryParams);
                 // get the record found count
                 $num = $stmt->rowCount();
                 // if more than 0 record found
                 if($num>0){                
                     // initializate tickets array
-                    $tickets_arr["records"]=array();
+                    $customers_arr["records"]=array();
                     // retrieve the content
                     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)){
                         // array that contains all data of each ticket found
-                        $ticket_item=array(
+                        $customer_item=array(
                             "id" => $row['id'],
-                            "opening_date" => $row['opening_date'],
-                            "closing_date" => $row['closing_date'],
-                            "customer" => $row['customer'],
-                            "agent" => $row['agent'],
-                            "priority" => $row['priority'],
-                            "status" => $row['status'],
-                            "object" => $row['object'],
-                            "message" => $row['message'],
-                            "direct link" => "/api/tickets/".$row['id']
+                            "company" => $row['opening_date'],
+                            "company_state" => $row['closing_date'],
+                            "company_phone" => $row['customer'],
+                            "ref_email" => $row['agent'],
+                            "ref_name" => $row['priority'],
+                            "direct link" => "/api/customers/".$row['id']
                         );
-                        array_push($tickets_arr["records"], $ticket_item);
+                        array_push($customers_arr["records"], $customer_item);
                     }                
                     // set response code 200 OK
                     http_response_code(200);                
                     // show tickets data in json format
-                    echo json_encode($tickets_arr);
+                    echo json_encode($customers_arr);
                 }
                 // if no tickets found
                 else{  
@@ -80,11 +76,12 @@
                     http_response_code(404);                  
                     // tell the user no tickets found
                     echo json_encode(
-                        array("message" => "No tickets found.")
+                        array("message" => "No customers found.")
                     );
                 }
             // if is PUT -> update ticket
             }elseif($requestMethod == 'PUT'){
+                /*
                 // retreive posted data
                 $data = json_decode(file_get_contents("php://input"));
 
@@ -125,9 +122,10 @@
                     http_response_code(400);
                     // tell the user
                     echo json_encode(array("message" => "Unable to update ticket. Data is incomplete or endpoint isn't correct for requested operation."));
-                }
+                }*/
             // if is POST -> create ticket
             }elseif($requestMethod == 'POST'){
+                /*
                 // retreive posted data
                 $data = json_decode(file_get_contents("php://input"));
                 // make sure main data are not empty
@@ -167,10 +165,10 @@
                     http_response_code(400);                
                     // tell the user
                     echo json_encode(array("message" => "Unable to create ticket. Data is incomplete or endpoint isn't correct for requested operation."));
-                }
+                }*/
             // if is DELETE -> delete ticket
             }elseif($requestMethod == 'DELETE'){
-
+                /*
                 if(!empty($queryParams['id'])){
                     $ticket->id = $queryParams['id'];
                     
@@ -192,7 +190,7 @@
                     http_response_code(400);                
                     // tell the user
                     echo json_encode(array("message" => "Unable to remove ticket. Data is incomplete or endpoint isn't correct for requested operation."));
-                }
+                }*/
             }
             // if is not one of previous declared accepted methods, tell the user
             else{
@@ -211,5 +209,5 @@
                 "error" => $e->getMessage()
             ));
         }
-    }   
+    }
 ?>
