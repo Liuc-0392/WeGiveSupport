@@ -3,7 +3,7 @@
     // set the headers
     header("Access-Control-Allow-Origin: https://wegivesupport.net/");  // same-Origin Policy (anti XSS)
     header('Content-Type: application/json; charset=UTF-8');            // tell to the client the MIME and charset
-    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');             // allow only GET and POST http methods
+    header('Access-Control-Allow-Methods: GET, PUT');                   // allow only GET and POST http methods
     // include the needed config files
     include_once '../config/database.php';
     include_once '../objects/agent.php';
@@ -64,15 +64,15 @@
                         array_push($agents_arr["records"], $agent_item);
                     }
                     // set response code 200 OK
-                    http_response_code(200);                
-                    // show tickets data in json format
+                    http_response_code(200);
+                    // show agents data in json format
                     echo json_encode($agents_arr);
                 }
-                // if no tickets found
+                // if no agents found
                 else{  
                     // set response code 404 Not found
                     http_response_code(404);                  
-                    // tell the user no tickets found
+                    // tell the user no agents found
                     echo json_encode(
                         array("message" => "No agent found.")
                     );
@@ -114,13 +114,14 @@
                     // tell the user
                     echo json_encode(array("message" => "Unable to update agent. Data is incomplete or endpoint isn't correct for requested operation."));
                 }
-            // if is POST -> create agent
-            }elseif($requestMethod == 'POST'){
-                
-            // if is DELETE -> delete ticket
-            }elseif($requestMethod == 'DELETE'){
-
-            }            
+            }
+            // if is not one of previous declared accepted methods, tell the user
+            else{
+                // set response code 400 Bad request
+                http_response_code(400);                
+                // tell the user
+                echo json_encode(array("message" => "Method not supported by API."));
+            }
         }
         catch (Exception $e){
             // if decode fails, it means jwt is invalid, so set the response code 401 Unauthorized and some details why decode fails

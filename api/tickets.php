@@ -3,7 +3,7 @@
     // set the headers
     header("Access-Control-Allow-Origin: https://wegivesupport.net/");  // same-Origin Policy (anti XSS)
     header('Content-Type: application/json; charset=UTF-8');            // tell to the client the MIME and charset
-    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');             // allow only GET and POST http methods
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');     // allow only GET and POST http methods
     // include the needed config files
     include_once '../config/database.php';
     include_once '../objects/ticket.php';
@@ -38,7 +38,8 @@
                 'id'        => isset($_GET['id'])       ? htmlspecialchars(strip_tags($_GET['id']))         : '',
                 'priority'  => isset($_GET['priority']) ? htmlspecialchars(strip_tags($_GET['priority']))   : '',
                 'status'    => isset($_GET['status'])   ? htmlspecialchars(strip_tags($_GET['status']))     : '',
-                'agent'    => isset($_GET['agent'])   ? htmlspecialchars(strip_tags($_GET['agent']))     : ''
+                'customer'  => isset($_GET['customer']) ? htmlspecialchars(strip_tags($_GET['customer']))   : '',
+                'agent'     => isset($_GET['agent'])    ? htmlspecialchars(strip_tags($_GET['agent']))      : ''
             );
             // get the request method
             $requestMethod = $_SERVER["REQUEST_METHOD"];

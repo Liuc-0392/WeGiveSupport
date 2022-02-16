@@ -1,6 +1,6 @@
 <?php
     class Ticket{
-        // class for management ticket data
+        // class for management tickets data
 
         // declare private variables with connection parameters
         private $conn;

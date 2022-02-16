@@ -1,9 +1,9 @@
 <?php
-    /** that's controller for tickets API calls **/
+    /** that's controller for customers API calls **/
     // set the headers
     header("Access-Control-Allow-Origin: https://wegivesupport.net/");  // same-Origin Policy (anti XSS)
     header('Content-Type: application/json; charset=UTF-8');            // tell to the client the MIME and charset
-    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');             // allow only GET and POST http methods
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');     // allow only GET and POST http methods
     // include the needed config files
     include_once '../config/database.php';
     include_once '../objects/customer.php';
@@ -31,7 +31,7 @@
             // get database connection
             $database = new Database();
             $db = $database->getConnection();
-            // instantiate new ticket object
+            // instantiate new customer object
             $customer = new Customer($db);                       
             // retreive the query parameters from url passing value and sanitize them
             $queryParams = array(
@@ -41,122 +41,113 @@
             );
             // get the request method
             $requestMethod = $_SERVER["REQUEST_METHOD"];
-            // if is GET -> read tickets
+
+            // if is GET -> read customers
             if($requestMethod == 'GET'){
-                // call readTickets
-                $stmt = $ticket->readCustomers($queryParams);
+                // call readCustomers
+                $stmt = $customer->readCustomers($queryParams);
                 // get the record found count
                 $num = $stmt->rowCount();
                 // if more than 0 record found
                 if($num>0){                
-                    // initializate tickets array
+                    // initializate customers array
                     $customers_arr["records"]=array();
                     // retrieve the content
                     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-                        // array that contains all data of each ticket found
+                        // array that contains all data of each customer found
                         $customer_item=array(
                             "id" => $row['id'],
-                            "company" => $row['opening_date'],
-                            "company_state" => $row['closing_date'],
-                            "company_phone" => $row['customer'],
-                            "ref_email" => $row['agent'],
-                            "ref_name" => $row['priority'],
+                            "company" => $row['company'],
+                            "company_state" => $row['company_state'],
+                            "company_phone" => $row['company_phone'],
+                            "ref_email" => $row['ref_email'],
+                            "ref_name" => $row['ref_name'],
                             "direct link" => "/api/customers/".$row['id']
                         );
                         array_push($customers_arr["records"], $customer_item);
                     }                
                     // set response code 200 OK
                     http_response_code(200);                
-                    // show tickets data in json format
+                    // show customer data in json format
                     echo json_encode($customers_arr);
                 }
-                // if no tickets found
+                // if no customer found
                 else{  
                     // set response code 404 Not found
                     http_response_code(404);                  
-                    // tell the user no tickets found
+                    // tell the user no customers found
                     echo json_encode(
                         array("message" => "No customers found.")
                     );
                 }
-            // if is PUT -> update ticket
+            // if is PUT -> update customer
             }elseif($requestMethod == 'PUT'){
-                /*
                 // retreive posted data
                 $data = json_decode(file_get_contents("php://input"));
 
-                // check if the request is getting from tickets/<id> endpoint and not /tickets only
+                // check if the request is getting from customer/<id> endpoint and not /customer only
                 if(!empty($queryParams['id']) &&
-                        !empty($data->customer) &&
-                            !empty($data->agent) &&
-                                !empty($data->priority) &&
-                                    !empty($data->object)){
-                    // set ticket property values
-                    $ticket->id = $queryParams['id'];
-                    $ticket->openingDate = $data->opening_date;
-                    $ticket->closingDate = $data->closing_date;
-                    $ticket->customer = $data->customer;
-                    $ticket->agent = $data->agent;
-                    $ticket->priority = $data->priority;
-                    $ticket->status = $data->status;
-                    $ticket->object = $data->object;
-                    $ticket->message = $data->message;
+                        !empty($data->company) &&
+                            !empty($data->ref_email) &&
+                                !empty($data->ref_name)){
+                    // set customer property values
+                    $customer->id = $queryParams['id'];
+                    $customer->company = $data->company;
+                    $customer->companyState = $data->company_state;
+                    $customer->companyPhone = $data->company_phone;
+                    $customer->refEmail = $data->ref_email;
+                    $customer->refName = $data->ref_name;
 
-                    // update the ticket
-                    if($ticket->updateTicket()){                
+                    // update the customer
+                    if($customer->updateCustomer()){                
                         // set response code 200 OK
                         http_response_code(200);                
                         // tell the user
-                        echo json_encode(array("message" => "Ticket was updated."));
-                    }                
-                    // if unable to update the ticket, tell the user
+                        echo json_encode(array("message" => "Customer was updated."));
+                    }
+                    // if unable to update the customer, tell the user
                     else{                
                         // set response code 503 Service unavailable
                         http_response_code(503);                
                         // tell the user
-                        echo json_encode(array("message" => "Unable to update ticket."));
+                        echo json_encode(array("message" => "Unable to update customer."));
                     }
                 }
                 else{
                     // set response code 400 Bad request
                     http_response_code(400);
                     // tell the user
-                    echo json_encode(array("message" => "Unable to update ticket. Data is incomplete or endpoint isn't correct for requested operation."));
-                }*/
-            // if is POST -> create ticket
+                    echo json_encode(array("message" => "Unable to update customer. Data is incomplete or endpoint isn't correct for requested operation."));
+                }
+            // if is POST -> create customer
             }elseif($requestMethod == 'POST'){
-                /*
                 // retreive posted data
                 $data = json_decode(file_get_contents("php://input"));
                 // make sure main data are not empty
-                if($_SERVER['REQUEST_URI'] == "/api/tickets" &&
-                        !empty($data->customer) &&
-                            !empty($data->agent) &&
-                                !empty($data->priority) &&
-                                    !empty($data->object)){
+                if($_SERVER['REQUEST_URI'] == "/api/customers" &&
+                        !empty($data->company) &&
+                            !empty($data->ref_email) &&
+                                !empty($data->ref_name)){
                     // set ticket property values
-                    $ticket->openingDate = date('Y-m-d H:i:s'); // now
-                    $ticket->closingDate = NULL;                // NULL for now
-                    $ticket->customer = $data->customer;
-                    $ticket->agent = $data->agent;
-                    $ticket->priority = $data->priority;
-                    $ticket->status = '1';                      // obviously open
-                    $ticket->object = $data->object;
-                    $ticket->message = $data->message;
+                    $customer->company = $data->company;
+                    $customer->companyState = $data->company_state;
+                    $customer->companyPhone = $data->company_phone;
+                    $customer->refEmail = $data->ref_email;
+                    $customer->refName = $data->ref_name;
 
                     // create the ticket
-                    if($ticket->createTicket()){                
+                    if($customer->createCustomer()){                
                         // set response code 201 Created
                         http_response_code(201);                
                         // tell the user
-                        echo json_encode(array("message" => "Ticket was created."));
+                        echo json_encode(array("message" => "Customer was created."));
                     }                
                     // if unable to create the ticket, tell the user
                     else{                
                         // set response code 503 Service unavailable
                         http_response_code(503);                
                         // tell the user
-                        echo json_encode(array("message" => "Unable to create ticket."));
+                        echo json_encode(array("message" => "Unable to create customer."));
                     }
                 }                
                 // tell the user which data is incomplete
@@ -164,33 +155,32 @@
                     // set response code 400 Bad request
                     http_response_code(400);                
                     // tell the user
-                    echo json_encode(array("message" => "Unable to create ticket. Data is incomplete or endpoint isn't correct for requested operation."));
-                }*/
-            // if is DELETE -> delete ticket
+                    echo json_encode(array("message" => "Unable to create customer. Data is incomplete or endpoint isn't correct for requested operation."));
+                }
+            // if is DELETE -> delete customer
             }elseif($requestMethod == 'DELETE'){
-                /*
                 if(!empty($queryParams['id'])){
-                    $ticket->id = $queryParams['id'];
+                    $customer->id = $queryParams['id'];
                     
-                    if($ticket->removeTicket()){
+                    if($customer->removeCustomer()){
                         // set response code 200 OK
                         http_response_code(201);                
                         // tell the user
-                        echo json_encode(array("message" => "Ticket was removed."));
+                        echo json_encode(array("message" => "Customer was removed."));
                     }
                     else{
                         // set response code 503 Service unavailable
                         http_response_code(503);                
                         // tell the user
-                        echo json_encode(array("message" => "Unable to remove ticket."));
+                        echo json_encode(array("message" => "Unable to remove customer."));
                     }
                 }
                 else{
                     // set response code 400 Bad request
                     http_response_code(400);                
                     // tell the user
-                    echo json_encode(array("message" => "Unable to remove ticket. Data is incomplete or endpoint isn't correct for requested operation."));
-                }*/
+                    echo json_encode(array("message" => "Unable to remove customer. Data is incomplete or endpoint isn't correct for requested operation."));
+                }
             }
             // if is not one of previous declared accepted methods, tell the user
             else{

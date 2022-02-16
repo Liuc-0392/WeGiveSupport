@@ -20,7 +20,7 @@
             $this->conn = $db;
         }
 
-        // function to read tickets (GET method only)
+        // function to read agents (GET method only)
         function readAgents($queryParams){
             /*  
                 case 1: read all agents (if id is not set)
@@ -97,7 +97,7 @@
  
             // if username exists, assign values to object properties for easy access and use
             if($num>0){
-        
+
                 // get record details / values
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
         
