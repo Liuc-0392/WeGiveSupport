@@ -125,6 +125,6 @@ Il link diretto permette, in caso di restituzione di una lista di risorse di acc
 - customer:
     POST e PUT:  {company, ref_emanil, ref_name}
 
-Documentazione
+Casi d'uso
 ------------
 [WIKI](https://github.com/Liuc-0392/WeGiveSupport/wiki/Caso-d'uso-standard)
